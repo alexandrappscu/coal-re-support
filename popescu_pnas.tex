@@ -1,0 +1,540 @@
+\documentclass[9pt,twoside]{pnas-new}
+\articletype{SOCIAL SCIENCES}
+\templatetype{pnasmathematics}
+% Remove DRAFT watermark
+\setboolean{displaywatermark}{false}
+\begin{document}
+\title{Coal dependence does not independently predict renewable energy support:
+       Evidence from survey data, production records, and news framing analysis}
+\author[a,1]{Alexandra S. Popescu}
+\affil[a]{Program in Quantitative Social Science, Dartmouth College,
+          Hanover, NH 03755}
+\leadauthor{Popescu}
+\significancestatement{Public resistance to renewable energy is often attributed
+to community dependence on fossil fuels. Using a cross-sectional survey
+(\textit{N}\,=\,2,400), sixty years of state-level coal production records, and
+zero-shot natural language processing applied to 122 news articles, this study
+finds that coal dependence does not independently predict renewable energy support
+once individual ideology and climate concern are controlled. However, coal
+dependence amplifies conservative resistance, creating a compounded disadvantage
+in coal communities. These findings suggest that structural economic interventions,
+not communication campaigns, are the more promising path to building durable
+public support for the energy transition.}
+\authorcontributions{A.S.P. merged all data, conducted all statistical analyses and natural language processing, and wrote the manuscript.}
+\authordeclaration{The author declares no competing interests.}
+\correspondingauthor{\textsuperscript{1}To whom correspondence should be
+addressed. E-mail: alexandra.s.popescu.28@dartmouth.edu}
+\keywords{renewable energy support $|$ coal dependence $|$ political ideology
+          $|$ energy transition $|$ zero-shot NLP}
+\begin{abstract}
+The energy transition requires broad public support, yet communities with deep
+ties to coal often exhibit the greatest skepticism. Whether that skepticism is
+rooted in place, specifically in the economic history of fossil fuel production,
+or in the individual political attitudes that cluster in those places is an open
+question with direct implications for policy design. This study addresses that
+question by combining individual-level survey data (\textit{N}\,=\,2,400),
+state-level coal production records from the U.S. Energy Information Administration
+(1960--2023), power plant proximity measures, and a zero-shot natural language
+processing analysis of 122 news articles. Five models are estimated: ordinary
+least squares (OLS) regression, an OLS model with a coal share $\times$ ideology
+interaction, a multilevel model (MLM) with state random intercepts, a CatBoost
+gradient-boosted tree model with Shapley Additive Explanations (SHAP), and a
+zero-shot news framing classifier using BART-large-MNLI. All five consistently
+show that state-level coal dependence does not independently predict renewable
+energy support once individual ideology and climate concern are controlled
+(intraclass correlation $\approx$\,0.00). However, a significant
+coal\,$\times$\,ideology interaction ($\hat{\beta} = -0.035$, $p = .049$) reveals
+that conservative residents of coal-dependent states face a compounded disadvantage
+beyond what ideology alone predicts. News framing analysis yields no significant
+association between coal share and climate-focused coverage
+($\chi^2 = 5.18$, $p = .159$). These findings suggest that resistance to
+renewable energy in fossil fuel communities is driven primarily by individual
+political identity, amplified by economic context. Structural economic
+interventions, rather than information campaigns, are the more promising lever
+for building the coalitions that a managed energy transition requires.
+\end{abstract}
+\dates{This manuscript was compiled on \today}
+\doi{\url{www.pnas.org/cgi/doi/10.1073/pnas.XXXXXXXXXX}}
+\maketitle
+\thispagestyle{firststyle}
+\ifthenelse{\boolean{shortarticle}}{\ifthenelse{\boolean{singlecolumn}}%
+  {\abscontentformatted}{\abscontent}}{}
+\Firstpage
+\section*{Introduction and Related Work}
+The United States faces a structural paradox in its energy transition: renewable
+energy commands majority public support nationally, yet the communities with the
+deepest ties to fossil fuel production often remain its most vocal opponents.
+Policy analysts and communication scholars have long debated whether this
+resistance reflects the economic and structural features of coal-dependent places,
+or whether it is more parsimoniously explained by the individual political
+identities that happen to concentrate in those communities \cite{Stokes2020,
+Mildenberger2019, Carley2020}. The answer matters considerably for policy design.
+If place shapes attitudes independently of individual ideology, then targeted
+regional interventions, whether economic or communicative, may shift opinion. If
+place is merely a proxy for the people who live there, then such investments may
+yield little return.
+
+Prior research establishes strong individual-level predictors of renewable energy
+support. Political ideology consistently emerges as the strongest negative
+predictor, while environmental concern and educational attainment are positive
+predictors \cite{Ansolabehere2014, Hess2014, Krupnick2010}. Less settled is
+whether community-level fossil fuel dependence exerts an independent effect once
+these individual characteristics are controlled. Some scholarship argues that
+carbon-intensive communities develop distinctive political cultures that suppress
+clean energy support through economic self-interest, identity formation, and local
+media framing \cite{Mildenberger2019, Jacobs2016}. Others contend that place
+adds little explanatory power once the compositional characteristics of residents
+are measured \cite{Carley2020, Ansolabehere2014}.
+
+This study addresses the debate directly through a multi-method empirical design
+that combines survey data, administrative production records, and computational
+text analysis. I test three related propositions: first, whether state-level coal
+dependence predicts renewable energy support after controlling for individual
+ideology and climate concern; second, whether coal dependence moderates the
+relationship between ideology and support, specifically whether conservative
+residents of coal states face a compounded disadvantage; and third, whether news
+media in coal-dependent states frame energy coverage differently in ways that might
+constitute a proximate mechanism linking place to attitudes.
+
+\section*{Data and Methods}
+\subsection*{Survey Data}
+Individual-level data come from a cross-sectional survey of U.S. adults
+(\textit{N}\,=\,2,400) conducted in 2024. The dependent variable is renewable
+energy support (Q137), measured on a five-point Likert scale
+(1\,=\,strongly oppose to 5\,=\,strongly support), with a mean of 3.96
+(SD\,=\,0.94). Predictors include political ideology (1--7, liberal to
+conservative), climate concern (composite), educational attainment, income,
+age, gender, and race/ethnicity drawn from a supplementary respondent file.
+After listwise deletion the analytic sample comprises
+\textit{N}\,=\,2,389 respondents nested in 48 states.
+
+\subsection*{State-Level Coal Dependence}
+State coal production data come from the U.S. Energy Information Administration's
+State Energy Data System (SEDS), 1960--2023 \cite{EIA2023}. Coal share is defined
+as each state's average share of total energy production attributable to coal over
+1990--2023, capturing the economic legacy of fossil fuel dependence rather than
+any single year's snapshot.
+
+\subsection*{Power Plant Proximity}
+Plant-level locations from EIA Form EIA-860 are used to compute state-level
+counts of active coal-fired and utility-scale solar and wind facilities,
+included as additional covariates to capture exposure to incumbent and emerging
+energy infrastructure.
+
+\subsection*{Regression Models}
+All continuous predictors are standardized (mean\,=\,0, SD\,=\,1) before
+estimation. The baseline OLS model regresses renewable energy support on
+individual and state-level predictors. The interaction model adds a
+coal\,$\times$\,ideology term. The mixed-effects model includes a random
+intercept by state estimated via restricted maximum likelihood; the ICC
+quantifies variance attributable to between-state differences. The swing-state
+model replicates the baseline specification on the 12 most contested states
+in the 2024 presidential election ($n = 687$).
+
+\subsection*{CatBoost and SHAP}
+A CatBoost gradient-boosted tree ensemble \cite{Prokhorenkova2018} was estimated
+with hyperparameters tuned via five-fold cross-validation (depth, learning rate,
+number of iterations). Variable importance was assessed using SHapley Additive
+exPlanations (SHAP) \cite{Lundberg2017}, which decompose each prediction into
+additive feature contributions.
+
+\subsection*{Zero-Shot News Framing}
+One hundred twenty-two news articles were collected via NewsAPI
+(January 2023 to March 2024) using search terms combining ``renewable energy,''
+``coal,'' and U.S. state names. Each article was classified using zero-shot
+natural language inference with \texttt{facebook/bart-large-mnli} \cite{Lewis2020}
+via the HuggingFace \texttt{transformers} library, with candidate labels:
+\textit{climate}, \textit{economic benefit}, \textit{energy security},
+and \textit{other}. The highest-probability label was assigned to each article.
+A Pearson chi-square test assessed whether frame distributions differed between
+high- and low-coal states (split at the sample median). A 50-state OLS regression
+tested the continuous association between coal share and percentage climate framing.
+
+\Endparasplit
+
+\section*{Results}
+
+\subsection*{Renewable Energy Support Is High Across the Political Spectrum}
+
+Before turning to the regression models, Figure~\ref{fig:statebar} presents mean
+renewable energy support by state, colored by the 2024 presidential election
+winner. Three patterns are immediately visible. First, support is high and
+relatively uniform: 46 of 48 states in the analytic sample record mean RE support
+above the scale midpoint of 3.0, and 44 exceed 3.5. Second, the partisan gap,
+while present, is modest. Democratic-won states cluster near the top of the
+distribution, but a large number of Republican-won states record means at or above
+the sample mean of 3.96. Third, the clearest outliers are Wyoming (mean\,$\approx$\,2.4)
+and Oklahoma (mean\,$\approx$\,3.5), both high-coal, Republican-won states, which
+hints at a role for fossil fuel context that the descriptive pattern alone cannot
+disentangle from ideology.
+
+Critically, several 2024 swing states, including Michigan, Wisconsin, Pennsylvania,
+Georgia, Arizona, North Carolina, and Nevada, all of which were won by the
+Republican candidate, record mean RE support close to or above the national mean.
+This suggests that even in the most electorally contested, politically mixed
+environments, renewable energy enjoys broad baseline support, and that the
+variation within Republican-won states is as informative as the variation between
+partisan groups. This descriptive picture motivates the regression models that
+follow: if place explained attitudes, we would expect Republican-won coal states
+to cluster distinctly below Democratic-won states; the fact that they do not
+points toward individual-level drivers.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{re_support_ranked_by_winner}
+\caption{Mean renewable energy support (1--5) by state, ranked from highest to
+lowest and colored by 2024 U.S. presidential election winner
+(blue\,=\,Democratic, red\,=\,Republican). The dashed vertical line marks the
+sample mean (3.96). Swing states that were carried by the Republican candidate
+in 2024, including Michigan, Wisconsin, Pennsylvania, Georgia, Arizona, North
+Carolina, and Nevada, are highlighted in red yet record mean RE support near or
+above the national average, consistent with the regression finding that place
+does not independently predict attitudes (\textit{N}\,=\,2,389).}
+\label{fig:statebar}
+\end{figure}
+
+\subsection*{Coal Dependence Does Not Independently Predict Renewable Energy Support}
+
+Table~\ref{tab:models} presents standardized regression coefficients across four
+model specifications. In the baseline OLS model, climate concern is the strongest
+positive predictor of renewable energy support
+($\hat{\beta} = +0.275$, $p < .001$), followed by educational attainment
+($\hat{\beta} = +0.068$, $p < .001$) and income
+($\hat{\beta} = +0.045$, $p < .01$). Political ideology is the strongest
+negative predictor ($\hat{\beta} = -0.129$, $p < .001$), with more conservative
+respondents reporting substantially lower support. Together, individual-level
+predictors explain approximately 21\% of variance in renewable energy support
+($R^2 = .211$).
+
+State-level coal share does not reach statistical significance in any additive
+specification ($\hat{\beta} = -0.018$, $p = .34$ in the baseline OLS;
+$\hat{\beta} = -0.022$, $p = .59$ in the swing-state subsample). This null
+finding is robust across the multilevel model, the swing-state subgroup, and
+the machine learning specification described below. Once individual ideology
+and climate concern are accounted for, a state's coal production history
+provides no independent predictive power over residents' attitudes toward
+renewable energy. The near-uniformly high RE support observed in Figure~\ref{fig:statebar},
+even across Republican-won swing states, is consistent with this result.
+
+The multilevel model confirms that this null finding is not an artifact of
+model misspecification. The intraclass correlation coefficient approaches zero
+(ICC\,$\approx$\,0.00), indicating that virtually no variance in renewable energy
+support is attributable to between-state differences after individual predictors
+are included. The random state intercept adds negligible explanatory value,
+reinforcing the conclusion that renewable energy attitudes are driven by who
+people are rather than where they live.
+
+\begin{table*}[t!]
+\centering
+\caption{Standardized regression coefficients predicting renewable energy support
+(1--5) across four model specifications. Standard errors in parentheses.}
+\label{tab:models}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccc@{}}
+ & OLS Baseline & OLS + Interaction & MLM & Swing States \\
+\midrule
+\multicolumn{5}{l}{\textit{Individual-level predictors}} \\
+Climate concern
+  & $0.275^{***}$ & $0.274^{***}$ & $0.274^{***}$ & $0.261^{***}$ \\
+  & $(0.021)$     & $(0.021)$     & $(0.021)$     & $(0.038)$     \\
+Ideology (conservative)
+  & $-0.129^{***}$ & $-0.131^{***}$ & $-0.130^{***}$ & $-0.144^{***}$ \\
+  & $(0.019)$      & $(0.019)$      & $(0.019)$      & $(0.034)$      \\
+Education
+  & $0.068^{***}$ & $0.068^{***}$ & $0.068^{***}$ & $0.071^{**}$ \\
+  & $(0.018)$     & $(0.018)$     & $(0.018)$     & $(0.033)$    \\
+Income
+  & $0.045^{**}$ & $0.045^{**}$ & $0.045^{**}$ & $0.039$ \\
+  & $(0.018)$    & $(0.018)$    & $(0.018)$    & $(0.033)$ \\
+\multicolumn{5}{l}{\textit{State-level predictor}} \\
+Coal share
+  & $-0.018$ & $-0.019$ & $-0.017$ & $-0.022$ \\
+  & $(0.019)$ & $(0.019)$ & $(0.022)$ & $(0.041)$ \\
+\multicolumn{5}{l}{\textit{Interaction}} \\
+Coal share $\times$ Ideology
+  & & $-0.035^{*}$ & & \\
+  & & $(0.018)$    & & \\
+\midrule
+$R^2$ / ICC & $.211$ & $.213$ & $\approx .000$ & $.198$ \\
+$N$         & $2{,}389$ & $2{,}389$ & $2{,}389$ & $687$ \\
+\bottomrule
+\end{tabular*}
+\addtabletext{All continuous predictors are standardized (mean\,=\,0, SD\,=\,1).
+$^{*}p < .05$;\; $^{**}p < .01$;\; $^{***}p < .001$.
+MLM $R^2$ is reported as ICC (proportion of variance due to state-level clustering).
+Swing state subsample includes respondents from the 12 most contested states in
+the 2024 U.S. presidential election.}
+\end{table*}
+
+\subsection*{Coal Dependence Amplifies Ideological Resistance}
+
+The OLS model with an interaction term reveals a significant
+coal\,$\times$\,ideology effect ($\hat{\beta} = -0.035$, $p = .049$). Among
+liberal respondents (ideology at $-$1\,SD), coal share has a near-zero marginal
+effect on renewable energy support. Among conservative respondents (ideology at
+$+$1\,SD), residing in a high-coal state is associated with meaningfully lower
+support, a pattern that is invisible in additive models that omit the interaction
+term. Figure~\ref{fig:marginal} illustrates this divergence: as coal share
+increases, predicted support declines most sharply among self-identified
+conservatives, producing a ``double disadvantage'' for those who are both
+ideologically conservative and economically embedded in fossil fuel production.
+Wyoming, annotated in Figure~\ref{fig:marginal} as a high-coal conservative
+state, exemplifies this pattern: it is the only state in Figure~\ref{fig:statebar}
+with mean RE support below 2.5, a level that cannot be explained by ideology
+alone given that other heavily Republican states without significant coal
+dependence record means close to the national average.
+
+This interaction is the study's primary substantive finding. It suggests that
+the political resistance to clean energy visible in states like West Virginia or
+Wyoming is not simply a product of conservative ideology in isolation, but of an
+amplification process by which economic context reinforces ideological
+predispositions. This pattern has important implications for both theory and
+policy, as discussed below.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{marginal_effects_interaction}
+\caption{Marginal effect of coal share on predicted renewable energy support by
+political ideology. Predicted values are derived from the OLS model with a
+coal\,$\times$\,ideology interaction term; all other covariates are held at
+their means. Shaded bands represent 95\% confidence intervals. Liberal and
+conservative are defined as ideology at $-$1\,SD and $+$1\,SD from the mean,
+respectively (\textit{N}\,=\,2,389).}
+\label{fig:marginal}
+\end{figure}
+
+\subsection*{SHAP Attribution Confirms Primacy of Individual Predictors}
+
+The gradient-boosted tree model (CatBoost) confirms the dominance of
+individual-level predictors in a non-parametric framework that makes no linearity
+assumptions. SHAP analysis identifies climate concern as the single largest
+contributor to predicted renewable energy support, followed by political ideology,
+educational attainment, and income. Coal share ranks among the lowest-importance
+features in the SHAP attribution plot, consistent with the null OLS finding and
+providing convergent validity from a machine learning perspective. The non-linear
+model uncovers no meaningful threshold effects or higher-order interactions beyond
+the coal\,$\times$\,ideology term already identified in the parametric models.
+
+\subsection*{News Framing Does Not Vary with Coal Dependence}
+
+Zero-shot classification of 122 news articles yields the following frame
+distribution: climate-focused (38\%), economic benefit (31\%), energy security
+(19\%), and other (12\%). A chi-square test comparing high- and low-coal states
+(split at the sample median) finds no significant difference in frame
+distribution ($\chi^2 = 5.18$, df\,=\,3, $p = .159$). As shown in
+Figure~\ref{fig:framing}, low-coal states receive somewhat more climate-focused
+coverage (47\% vs. 28\%) and high-coal states somewhat more economic framing
+(36\% vs. 26\%), but these differences do not reach conventional significance
+thresholds. Extending the analysis to all 50 states using a continuous OLS
+regression of percentage climate framing on coal share likewise yields a null
+result ($\hat{\beta} = -0.08$, $p = .42$, $R^2 = .01$). Media coverage of energy
+issues does not appear to vary systematically with state coal dependence, ruling
+out differential news framing as a proximate mechanism linking place to attitudes.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{framing_bar}
+\caption{Distribution of news frames by state coal dependence group. States are
+split at the sample median coal share into high-coal and low-coal groups.
+Bars show the percentage of articles classified into each frame by the
+BART-large-MNLI zero-shot classifier. Although low-coal states show a higher
+share of climate framing and high-coal states a higher share of economic framing,
+the difference in frame distributions is not statistically significant
+($\chi^2 = 5.18$, df\,=\,3, $p = .159$; \textit{N}\,=\,122 articles).}
+\label{fig:framing}
+\end{figure}
+
+\section*{Discussion}
+
+\subsection*{Place Does Not Drive Renewable Energy Attitudes}
+
+The central finding of this study is a null result of substantive importance:
+state-level coal dependence does not independently predict renewable energy
+support once individual ideology and climate concern are controlled. Figure~\ref{fig:statebar}
+makes this visible at a glance: Republican-won swing states such as Michigan,
+Wisconsin, and Pennsylvania, states that carry significant electoral weight and
+mixed economic histories, record mean RE support near or above the national
+average of 3.96. The intraclass correlation from the multilevel model approaches
+zero, and coal share is consistently non-significant across OLS, swing-state, and
+machine learning specifications. This suggests that the apparent link between
+fossil fuel communities and clean energy skepticism is largely a compositional
+effect, a reflection of who lives in coal states rather than the states themselves.
+
+This finding challenges policy frameworks premised on the assumption that place
+shapes attitudes through economic self-interest or regional political culture.
+Targeted information campaigns about local renewable energy benefits, a common
+intervention design, are unlikely to move attitudes that are primarily a product
+of individual-level ideological identity. The appropriate unit of intervention
+is the person, not the place.
+
+\subsection*{The Interaction Finding and Its Policy Implications}
+
+The one exception to this pattern is both statistically significant and
+theoretically meaningful. The coal\,$\times$\,ideology interaction
+($\hat{\beta} = -0.035$, $p = .049$) reveals that living in a coal-dependent
+state amplifies ideological resistance to renewable energy, and this effect
+holds only among conservatives. This ``double disadvantage,'' illustrated in
+Figure~\ref{fig:marginal}, is invisible in additive models and may explain why
+prior research has reached conflicting conclusions about the role of place in
+shaping energy attitudes. Wyoming's position as the lowest-ranked state in
+Figure~\ref{fig:statebar}, despite not being dramatically more Republican than
+Kansas or Oklahoma, is consistent with this interaction: high coal share
+compounds the ideological effect in ways that additive models cannot capture.
+
+The implication is that energy transition policy must do more than change minds.
+In communities where conservative ideology and coal dependence interact to
+suppress renewable energy support, durable change is unlikely to emerge from
+communication strategies alone. Structural economic interventions are the more
+promising lever for building the necessary coalitions, including job guarantee
+programs, severance and retraining funds, and community benefit agreements tied
+to renewable siting \cite{Carley2020, Stokes2020}. These interventions operate
+on the material conditions that amplify ideological resistance, rather than on
+ideology itself.
+
+\subsection*{Null Framing Result as a Finding}
+
+The absence of a significant relationship between coal share and news framing,
+shown in Figure~\ref{fig:framing}, rules out one plausible mechanism: that
+coal-dependent states receive disproportionately economic or energy-security
+coverage that dampens climate concern and renewable energy support. Although the
+direction of the framing differences is consistent with theoretical expectations,
+the magnitude is too small to reach significance at the sample sizes available.
+This shifts the explanatory burden back toward political socialization,
+economic self-interest, and identity processes operating largely outside direct
+media influence, suggesting that framing interventions targeted at coal-state
+media markets would be unlikely to succeed on their own.
+
+\subsection*{Limitations and Future Directions}
+
+Several limitations bound these conclusions. The survey is cross-sectional,
+precluding causal inference. Coal share is measured at the state level, which
+may mask important county-level variation in fossil fuel dependence and economic
+exposure. The news corpus (\textit{N}\,=\,122) is modest and limited to
+English-language national outlets, potentially missing hyper-local media most
+salient to community attitude formation. Zero-shot classification, while
+reproducible and scalable, may not capture nuanced framing distinctions that
+fine-tuned models or human coders would identify. Future work should use panel
+survey data, county-level economic exposure measures, and larger and more
+geographically targeted media corpora to adjudicate among the attitude formation
+mechanisms this study cannot resolve.
+
+\section*{Agentic Analysis}
+
+Artificial intelligence tools played an integral role at every stage of this
+project, and QSS~45's explicit encouragement to engage with these technologies
+critically and purposefully shaped how I approached them. The first substantive
+use came during the literature review phase, where I used NotebookLM as a
+reading and synthesis partner. Uploading twelve sources and querying the tool
+across them simultaneously allowed me to map the conceptual structure of the
+field far more efficiently than reading sequentially would have permitted. The
+mind map NotebookLM generated made the dominant clusters visible at a glance:
+the Energy Justice framework, the structural vulnerability literature, and the
+framing debate. What the exercise also made clear, however, was the importance
+of verification. When I cross-checked three specific claims the tool generated
+against the original sources, none was fully accurate: two were partially
+accurate, presenting only part of the evidence, and one was a hallucination
+that attributed a characterisation of Appalachian jobs as ``high-wage'' to
+Graff and Carley (2018) when the source made no such claim. This taught me
+that source-grounded AI reduces hallucination but does not eliminate it, and
+that the researcher remains responsible for every claim that carries their name.
+
+For the quantitative and computational components of the project, I used
+Claude as an agentic coding assistant, which required a different set of skills
+than simply querying a chatbot. I learned that the quality of the output
+is directly proportional to the precision of the prompt. Vague instructions
+such as ``run a regression'' produced generic code; specifying the dependent
+variable, the standardisation procedure, the exact interaction term, and the
+desired output format produced working, interpretable results. I also learned
+to prompt for explanation alongside execution: asking the model not only to
+produce code but to explain what each step does and why forced me to engage
+with the methodological logic rather than treat the output as a black box.
+This was essential for interpreting results correctly, particularly for the
+multilevel model's ICC and the SHAP feature attributions, where understanding
+what the number means conceptually is as important as obtaining it. The
+zero-shot NLP pipeline required especially careful prompt design: specifying
+the candidate labels, the model, and the aggregation logic step by step
+produced reproducible classifications, whereas underspecified prompts returned
+inconsistent frame assignments. Across all of these tasks, the course's
+emphasis on understanding method before delegating execution proved essential.
+AI can accelerate analysis, but only a researcher who understands what OLS
+assumes, why an interaction term changes the interpretation of main effects,
+and what a null ICC implies can evaluate whether the output is correct.
+The most important skill QSS~45 gave me is not knowing how to use these tools,
+but knowing when and whether to trust them.
+
+\dataavail{Survey data are available upon request. EIA SEDS coal production data
+are publicly available at \url{https://www.eia.gov/state/seds/}. EIA Form EIA-860
+plant data are available at \url{https://www.eia.gov/electricity/data/eia860/}.
+Analysis code and processed datasets are archived at
+\url{https://github.com/alexandrapopescu/coal-re-support}.}
+
+\acknow{The author thanks Professor Herbert Chang at Dartmouth College for
+guidance throughout this project. All analyses were conducted in Python~3.10
+using \texttt{statsmodels}, \texttt{pymer4}, \texttt{catboost}, \texttt{shap},
+and \texttt{transformers}.}
+
+\showacknow
+
+\begin{thebibliography}{99}
+
+\bibitem{Stokes2020}
+Stokes LC (2020)
+\newblock \textit{Short Circuiting Policy: Interest Groups and the Battle Over
+Clean Energy and Climate Policy in the American States}
+(Oxford Univ Press, New York).
+
+\bibitem{Mildenberger2019}
+Mildenberger M (2019)
+\newblock \textit{Carbon Captured: How Business and Labor Control Climate Politics}
+(MIT Press, Cambridge, MA).
+
+\bibitem{Carley2020}
+Carley S, Konisky DM (2020)
+\newblock The justice and equity implications of the clean energy transition.
+\newblock \textit{Nat Energy} 5(8):569--577.
+
+\bibitem{Ansolabehere2014}
+Ansolabehere S, Konisky DM (2014)
+\newblock \textit{Cheap and Clean: How Americans Think About Energy in the Age of
+Global Warming}
+(MIT Press, Cambridge, MA).
+
+\bibitem{Hess2014}
+Hess DJ (2014)
+\newblock Sustainability transitions: A political coalition perspective.
+\newblock \textit{Res Policy} 43(2):278--283.
+
+\bibitem{Krupnick2010}
+Krupnick A, et al. (2010)
+\newblock Public views on a 21st-century electricity policy.
+\newblock \textit{Public Opin Q} 74(3):449--473.
+
+\bibitem{Jacobs2016}
+Jacobs M (2016)
+\newblock The politics of economic growth.
+\newblock \textit{J Policy Hist} 28(1):113--136.
+
+\bibitem{EIA2023}
+U.S. Energy Information Administration (2023)
+\newblock State Energy Data System (SEDS): 1960--2023.
+\newblock Available at \url{https://www.eia.gov/state/seds/}.
+Accessed January 2024.
+
+\bibitem{Prokhorenkova2018}
+Prokhorenkova L, Gusev G, Vorobev A, Dorogush AV, Gulin A (2018)
+\newblock CatBoost: Unbiased boosting with categorical features.
+\newblock \textit{Adv Neural Inf Process Syst} 31:6638--6648.
+
+\bibitem{Lundberg2017}
+Lundberg SM, Lee SI (2017)
+\newblock A unified approach to interpreting model predictions.
+\newblock \textit{Adv Neural Inf Process Syst} 30:4765--4774.
+
+\bibitem{Lewis2020}
+Lewis M, et al. (2020)
+\newblock BART: Denoising sequence-to-sequence pre-training for natural language
+generation, translation, and comprehension.
+\newblock \textit{Proc 58th Annu Meet Assoc Comput Linguist}, pp 7871--7880.
+
+\end{thebibliography}
+
+\end{document}
